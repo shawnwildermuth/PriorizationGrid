@@ -1,16 +1,21 @@
 i
 <script lang="ts">
-import { computed, defineComponent, reactive, ref } from "vue";
+import { computed, defineComponent, getCurrentInstance, reactive, ref } from "vue";
 import Item from "../models/Item";
+import VotingControl from "../components/votingControl.vue";
 
 export default defineComponent({
+  components: {
+    VotingControl
+  },
   setup() {
     const items = reactive(new Array<Item>());
     clear();
 
     function clear() {
-      // Initally create 10
-      for (let x = 0; x < 10; ++x) items.push(new Item(x));
+      // Initally create 5
+      items.length = 0;
+      for (let x = 0; x < 5; ++x) items.push(new Item(x));
     }
 
     function remove(item: Item) {
@@ -41,7 +46,7 @@ export default defineComponent({
     </div>
     <table>
       <tr v-for="i in items" :key="i.id">
-        
+        <VotingControl :items="items" :item="i"></VotingControl> 
 
         <td :colspan="items.length - items.indexOf(i)">
           <span class="text-xl font-semibold"
@@ -60,6 +65,6 @@ export default defineComponent({
     <div>
       <button @click="add()"><i class="fas fa-plus"></i> Add New Item</button>
     </div>
-    <pre>{{ JSON.stringify(items, null, "  ") }}</pre>
+    <!-- <pre>{{ JSON.stringify(items, null, "  ") }}</pre> -->
   </div>
 </template>

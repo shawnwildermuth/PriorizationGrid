@@ -4,7 +4,7 @@ type Pair = {
   second: Item;
 };
 
-import { defineComponent } from "vue";
+import { defineComponent, onMounted, watch, watchEffect } from "vue";
 import Item from "../models/Item";
 export default defineComponent({
   props: {
@@ -12,44 +12,50 @@ export default defineComponent({
     item: { type: Object as () => Item, required: true },
   },
   setup(props) {
-    const matrix = new Array<Pair>();
+    const voting = new Array<Pair>();
 
-    for (let item of props.items) {
-      const rowIndex = props.items.indexOf(props.item);
-      const index = props.items.indexOf(item);
-      if (index >= rowIndex) break;
-      const pair: Pair = { first: item, second: props.item };
+    watchEffect(() => {
+      voting.length = 0;
+      for (let item of props.items) {
+        const rowIndex = props.items.indexOf(props.item);
+        const index = props.items.indexOf(item);
+        if (index >= rowIndex) break;
+        const pair: Pair = { first: item, second: props.item };
 
-      matrix.push(pair);
-    }
+        voting.push(pair);
+      }
+    });
 
     return {
-      matrix,
+      voting,
     };
   },
 });
 </script>
 
 <template>
-  <td v-for="num in Number(items.indexOf(item))">
+  <td v-for="pair in voting">
     <div class="flex flex-col border border-gray-400 p-0.5">
       <div class="flex justify-between align-text-bottom">
-        <label for="'item' + num">{{ items.indexOf(i) + num - 1 }}</label>
+        <label :for="'item' + pair.first.id + '-' + pair.second.id">{{
+          items.indexOf(pair.first) + 1
+        }}</label>
         <input
-          :id="'item' + num"
+          :id="'item' + pair.first.id + '-' + pair.second.id"
           type="radio"
           class="icon"
-          :value="item.id"
-          :name="'choice' + item.id"
+          :name="'choice' + pair.first.id + '-' + pair.second.id"
         />
       </div>
       <div class="flex justify-between align-text-bottom">
-        <label for="'item' + num">{{ items.indexOf(i) + num }}</label>
+        <label :for="'item' + pair.second.id + '-' + pair.second.id">{{
+          items.indexOf(pair.second) + 1
+        }}</label>
         <input
           type="radio"
           class="icon"
-          :value="i.id"
-          :name="'choice' + i.id"
+          :id="'item' + pair.second.id + '-' + pair.second.id"
+          :name="'choice' + pair.first.id + '-' + pair.second.id"
         />
       </div>
     </div>
