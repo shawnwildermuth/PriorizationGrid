@@ -1,62 +1,59 @@
 <script lang="ts">
-type Pair = {
-  first: Item;
-  second: Item;
-};
+import { defineComponent, watchEffect } from "vue";
+import Vote from "../models/Vote";
+import Task from "../models/Task";
+import { getStore } from "../store";
 
-import { defineComponent, onMounted, watch, watchEffect } from "vue";
-import Item from "../models/Item";
 export default defineComponent({
   props: {
-    items: { type: Object as () => Array<Item>, required: true },
-    item: { type: Object as () => Item, required: true },
+    item: { type: Object as () => Task, required: true },
   },
   setup(props) {
-    const voting = new Array<Pair>();
 
-    watchEffect(() => {
-      voting.length = 0;
-      for (let item of props.items) {
-        const rowIndex = props.items.indexOf(props.item);
-        const index = props.items.indexOf(item);
-        if (index >= rowIndex) break;
-        const pair: Pair = { first: item, second: props.item };
+    const store = getStore();
 
-        voting.push(pair);
-      }
-    });
+    const id = props.item.id;
+    let votes: Array<Vote> | null  = null;
+    if (store.state.votes[id]) {
+      const currentVotes = store.state.votes[id];
+      if (currentVotes) votes = currentVotes;
+    }
 
     return {
-      voting,
+      votes
     };
   },
 });
 </script>
 
 <template>
-  <td v-for="pair in voting">
+  <td v-for="vote in votes">
     <div class="flex flex-col border border-gray-400 p-0.5">
       <div class="flex justify-between align-text-bottom">
-        <label :for="'item' + pair.first.id + '-' + pair.second.id">{{
-          items.indexOf(pair.first) + 1
-        }}</label>
         <input
-          :id="'item' + pair.first.id + '-' + pair.second.id"
+          :id="'item' + vote.first.id + '-' + vote.second.id"
           type="radio"
           class="icon"
-          :name="'choice' + pair.first.id + '-' + pair.second.id"
+          v-model="vote.choice"
+          value="true"
+          :name="'choice' + vote.first.id + '-' + vote.second.id"
         />
+        <label :for="'item' + vote.first.id + '-' + vote.second.id">{{
+          vote.first.id
+        }}</label>
       </div>
       <div class="flex justify-between align-text-bottom">
-        <label :for="'item' + pair.second.id + '-' + pair.second.id">{{
-          items.indexOf(pair.second) + 1
-        }}</label>
         <input
           type="radio"
           class="icon"
-          :id="'item' + pair.second.id + '-' + pair.second.id"
-          :name="'choice' + pair.first.id + '-' + pair.second.id"
+          v-model="vote.choice"
+          value="false"
+          :id="'item' + vote.second.id + '-' + vote.second.id"
+          :name="'choice' + vote.first.id + '-' + vote.second.id"
         />
+        <label :for="'item' + vote.second.id + '-' + vote.second.id">{{
+          vote.first.id
+        }}</label>
       </div>
     </div>
     <!-- <button class="icon"><i class="fas fa-chevron-up"></i></button>

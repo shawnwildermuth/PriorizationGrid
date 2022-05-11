@@ -1,4 +1,4 @@
-export default class Item {
+export default class Task {
   title = "";
   
   constructor(public id: number) {}
