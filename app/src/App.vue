@@ -9,13 +9,13 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="container mx-auto bg-amber-50 min-h-screen p-3">
-    <div class="flex justify-between">
-      <div>PriorGrid</div>
+  <div class="container mx-auto bg-white min-h-screen">
+    <div class="flex justify-between p-2 bg-amber-700 text-white">
+      <div class="text-2xl font-bold">Priority Grid</div>
       <div>
-        <router-link to="/" class="button">Home</router-link>
+        <router-link to="/" class="button bg-slate-200 text-black hover:bg-slate-500">Home</router-link>
       </div>
     </div>
-    <router-view></router-view>
+    <router-view class="p-2"></router-view>
   </div>
 </template>
