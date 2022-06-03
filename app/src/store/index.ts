@@ -4,7 +4,7 @@ import Task from "../models/Task";
 
 type State = {
   tasks: Array<Task>;
-  highlightedIds: Array<Number>;
+  highlightedIds: Array<String>;
   votes: { [key: string]: Vote[] };
 };
 
@@ -24,8 +24,11 @@ const theStore = reactive({
   },
   createDefault() {
     this.clear();
+    const sample = [
+      "First", "Second", "Third", "Fourth", "Fifth"
+    ];
     for (let x = 0; x < 5; ++x) {
-      this.add();
+      this.add(sample[x]);
     }
   },
   createVotes(task: Task) {
@@ -36,14 +39,26 @@ const theStore = reactive({
     }
     this.state.votes[task.id.toString()] = newVotes;
   },
+  move(item: Task, direction: number) {
+    const taskIndex = this.state.tasks.indexOf(item);
+    if (taskIndex >= 0) {
+      const newIndex = taskIndex + direction;
+      const oldTask = this.state.tasks[newIndex];
+      const itemId = item.id;
+      this.state.tasks[newIndex] = item;
+      this.state.tasks[taskIndex] = oldTask;
+      this.createVotes(item);
+      this.createVotes(oldTask);
+    }
+  },
   remove(item: Task) {
     this.state.tasks.splice(this.state.tasks.indexOf(item), 1);
     delete this.state.votes[item.id];
   },
   add(taskName: string = "") {
     const ids = this.state.tasks.map((i) => i.id);
-    const lastItem = ids.length > 0 ? Math.max(...ids) : 0;
-    const newTask = new Task(lastItem ? lastItem + 1 : 1);
+    const lastItem = ids.length > 0 ? Math.max(...ids.map(i => Number(i))) : 0;
+    const newTask = new Task((lastItem ? lastItem + 1 : 1).toString());
     newTask.title = taskName;
     this.state.tasks.push(newTask);
     this.createVotes(newTask);
@@ -56,7 +71,7 @@ const theStore = reactive({
       }
     }
   },
-  isHighlighted(id: Number) {
+  isHighlighted(id: String) {
     const index = this.state.highlightedIds.indexOf(id);
     return index !== -1;
   },

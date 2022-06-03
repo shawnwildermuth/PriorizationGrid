@@ -1,5 +1,5 @@
 export default class Task {
   title = "";
   
-  constructor(public id: number) {}
+  constructor(public id: string) {}
 }
