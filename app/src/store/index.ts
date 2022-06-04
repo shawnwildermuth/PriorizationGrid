@@ -51,9 +51,13 @@ const theStore = reactive({
       this.createVotes(oldTask);
     }
   },
+  refreshVotes() {
+    this.state.tasks.forEach(t => this.createVotes(t));
+  },
   remove(item: Task) {
     this.state.tasks.splice(this.state.tasks.indexOf(item), 1);
     delete this.state.votes[item.id];
+    this.refreshVotes();
   },
   add(taskName: string = "") {
     const ids = this.state.tasks.map((i) => i.id);
