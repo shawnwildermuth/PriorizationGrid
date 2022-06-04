@@ -1,11 +1,16 @@
 import { reactive, watch, watchEffect } from "vue";
 import Vote from "../models/Vote";
 import Task from "../models/Task";
+import { instanceToPlain, plainToInstance, Type } from "class-transformer";
+import "reflect-metadata";
 
-type State = {
-  tasks: Array<Task>;
-  highlightedIds: Array<String>;
-  votes: { [key: string]: Vote[] };
+export class State {
+  @Type(() => Task)
+  tasks = new Array<Task>();
+  @Type(() => String)
+  highlightedIds = new Array<String>();
+  @Type(() => Vote)
+  votes: { [key: string]: Vote[] } = {};
 };
 
 const THESTORE = "THESTORE";
@@ -35,7 +40,7 @@ const theStore = reactive({
     const pos = this.state.tasks.indexOf(task);
     const newVotes = new Array<Vote>();
     for (let x = 0; x < pos; ++x) {
-      newVotes.push(new Vote(this.state.tasks[x], task));
+      newVotes.push(new Vote(this.state.tasks[x].id, task.id));
     }
     this.state.votes[task.id.toString()] = newVotes;
   },
@@ -84,24 +89,28 @@ const theStore = reactive({
 watch(
   () => theStore,
   () => {
-    localStorage.setItem(THESTORE, JSON.stringify(theStore.state));
+    localStorage.setItem(THESTORE, JSON.stringify(instanceToPlain(theStore.state)));
   },
   { deep: true }
 );
 
+let isLoading = false;
+
 export function getStore() {
-  const testing = true;
+  const testing = false;
   if (!storeLoaded) {
     const json = localStorage.getItem(THESTORE);
     if (json && json.length > 0 && !testing) {
       // Load from Local Storage
       const stored = JSON.parse(json);
-      theStore.state = stored;
+      const state = plainToInstance(State, stored);
+      theStore.state = state;
     } else {
       // Load default
       theStore.createDefault();
     }
   }
+  //theStore.refreshVotes();
   storeLoaded = true;
   return theStore;
 }

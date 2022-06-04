@@ -1,11 +1,9 @@
 import Task from "./Task";
+import { State, getStore } from "../store";
 
 export default class Vote {
+  constructor(public firstId: string, public secondId: string) {}
 
-  constructor(public first: Task , public second: Task) {
-  }
+  choice: Boolean | null = null;
 
-  choice: Boolean | null = null; 
-
-};
-
+}

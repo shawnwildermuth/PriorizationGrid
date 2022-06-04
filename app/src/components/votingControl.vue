@@ -24,17 +24,25 @@ export default defineComponent({
 
     function markAsHighlight(vote: Vote, clear: Boolean = false) {
       store.state.highlightedIds.length = 0;
-      store.state.highlightedIds.push(...[vote.first.id, vote.second.id]);
+      store.state.highlightedIds.push(...[vote.firstId, vote.secondId]);
     }
 
     function clearAsHighlight() {
       store.state.highlightedIds.length = 0;
     }
 
-    function tasksLabel(first: Task, second: Task) {
-      const firstIndex = store.state.tasks.indexOf(first);
-      const secondIndex = store.state.tasks.indexOf(second);
+    function tasksLabel(firstId: string, secondId: string) {
+      const first = store.state.tasks.find(v => v.id === firstId);
+      const second = store.state.tasks.find(v => v.id === firstId);
+      const firstIndex = store.state.tasks.indexOf(first!);
+      const secondIndex = store.state.tasks.indexOf(second!);
       return `${firstIndex}-${secondIndex}`;
+    }
+
+    function taskOrdinal(id: string): Number {
+      const task = store.state.tasks.find(v => v.id === id);
+      if (!task) throw "Failed to find task";
+      return store.state.tasks.indexOf(task) + 1;
     }
 
     return {
@@ -42,7 +50,8 @@ export default defineComponent({
       markAsHighlight,
       clearAsHighlight,
       store,
-      tasksLabel
+      tasksLabel,
+      taskOrdinal
     };
   },
 });
@@ -58,18 +67,18 @@ export default defineComponent({
     >
       <div class="flex justify-between align-text-bottom">
         <input
-          :id="'item' + tasksLabel(vote.first, vote.second)"
+          :id="'item' + tasksLabel(vote.firstId, vote.secondId)"
           type="radio"
           class="mt-1.5 mr-1"
           v-model="vote.choice"
           value="true"
           tabindex="-1"
-          :name="'choice' + tasksLabel(vote.first, vote.second)"
+          :name="'choice' + tasksLabel(vote.firstId, vote.secondId)"
         />
         <label
-          :for="'item' + store.state.tasks.indexOf(vote.first) + '-' + store.state.tasks.indexOf(vote.second)"
+          :for="'item' + tasksLabel(vote.firstId, vote.secondId)"
           tabindex="-1"
-          >{{ store.state.tasks.indexOf(vote.first) + 1}}</label
+          >{{ taskOrdinal(vote.firstId) }}</label
         >
       </div>
       <div class="flex justify-between align-text-bottom">
@@ -79,13 +88,13 @@ export default defineComponent({
           v-model="vote.choice"
           value="false"
           tabindex="-1"
-          :id="'item' + tasksLabel(vote.second, vote.second)"
-          :name="'choice' + tasksLabel(vote.first, vote.second)"
+          :id="'item' + tasksLabel(vote.secondId, vote.secondId)"
+          :name="'choice' + tasksLabel(vote.firstId, vote.secondId)"
         />
         <label
           tabindex="-1"
-          :for="'item' + tasksLabel(vote.second, vote.second)"
-          >{{ store.state.tasks.indexOf(vote.second) + 1 }}</label
+          :for="'item' + tasksLabel(vote.secondId, vote.secondId)"
+          >{{ taskOrdinal(vote.secondId) }}</label
         >
       </div>
     </div>
